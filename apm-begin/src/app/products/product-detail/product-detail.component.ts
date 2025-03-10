@@ -9,7 +9,7 @@ import {
 
 import { NgIf, NgFor, CurrencyPipe } from '@angular/common';
 import { Product } from '../product';
-import { Subscription, tap } from 'rxjs';
+import { catchError, EMPTY, Subscription, tap } from 'rxjs';
 import { ProductService } from '../product.service';
 
 @Component({
@@ -39,7 +39,13 @@ export class ProductDetailComponent implements OnChanges, OnDestroy {
     if (id) {
       this.sub = this.productService
         .getProduct(id)
-        .pipe(tap(() => console.log('in subscription')))
+        .pipe(
+          tap(() => console.log('in subscription')),
+          catchError((err) => {
+            this.errorMessage = err;
+            return EMPTY;
+          })
+        )
         .subscribe((product: Product) => (this.product = product));
     }
   }

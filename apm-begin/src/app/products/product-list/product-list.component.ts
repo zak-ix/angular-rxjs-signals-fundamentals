@@ -4,7 +4,7 @@ import { NgIf, NgFor, NgClass } from '@angular/common';
 import { Product } from '../product';
 import { ProductDetailComponent } from '../product-detail/product-detail.component';
 import { ProductService } from '../product.service';
-import { Subscription, tap } from 'rxjs';
+import { catchError, EMPTY, Subscription, tap } from 'rxjs';
 
 @Component({
   selector: 'pm-product-list',
@@ -16,7 +16,7 @@ export class ProductListComponent {
   // Just enough here for the template to compile
   pageTitle = 'Products';
   errorMessage = '';
-  sub!: Subscription
+  sub!: Subscription;
 
   private productService = inject(ProductService);
 
@@ -29,12 +29,18 @@ export class ProductListComponent {
   ngOnInit(): void {
     this.sub = this.productService
       .getProducts()
-      .pipe(tap(() => console.log('In component pipe')))
-      .subscribe(products => this.products = products);
+      .pipe(
+        tap(() => console.log('In component pipe')),
+        catchError((err) => {
+          this.errorMessage = err;
+          return EMPTY;
+        })
+      )
+      .subscribe((products) => (this.products = products));
   }
 
   ngOnDestroy(): void {
-    this.sub.unsubscribe()
+    this.sub.unsubscribe();
   }
 
   onSelected(productId: number): void {
