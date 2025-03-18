@@ -3,7 +3,7 @@ import { Component, inject } from '@angular/core';
 import { NgIf, NgFor, NgClass, AsyncPipe } from '@angular/common';
 import { ProductDetailComponent } from '../product-detail/product-detail.component';
 import { ProductService } from '../product.service';
-import { catchError, EMPTY, shareReplay, Subscription, tap } from 'rxjs';
+import { catchError, EMPTY, tap } from 'rxjs';
 
 @Component({
   selector: 'pm-product-list',
@@ -15,7 +15,6 @@ export class ProductListComponent {
   // Just enough here for the template to compile
   pageTitle = 'Products';
   errorMessage = '';
-  sub!: Subscription;
 
   private productService = inject(ProductService);
 
@@ -28,9 +27,9 @@ export class ProductListComponent {
   );
 
   // Selected product id to highlight the entry
-  selectedProductId: number = 0;
+  readonly selectedProductId$ = this.productService.productSelected$;
 
   onSelected(productId: number): void {
-    this.selectedProductId = productId;
+    this.productService.productSelected(productId);
   }
 }

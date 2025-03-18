@@ -1,7 +1,10 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import {
+  BehaviorSubject,
   catchError,
+  combineLatest,
+  filter,
   map,
   Observable,
   of,
@@ -27,9 +30,26 @@ export class ProductService {
   private readonly errorService = inject(HttpErrorService);
   private readonly reviewService = inject(ReviewService);
 
+  private productSelectedSubject = new BehaviorSubject<number | undefined>(
+    undefined
+  );
+  readonly productSelected$ = this.productSelectedSubject.asObservable();
+
   readonly products$ = this.http.get<Product[]>(this.productsUrl).pipe(
     tap(() => console.log('in observable pipeline')),
     shareReplay(1),
+    catchError((err) => this.handleError(err))
+  );
+
+  readonly product$ = combineLatest([
+    this.products$,
+    this.productSelected$,
+  ]).pipe(
+    map(([products, selectedProduct]) =>
+      products.find((product) => product.id === selectedProduct)
+    ),
+    filter(Boolean),
+    switchMap((product) => this.getProductsWithReviews(product)),
     catchError((err) => this.handleError(err))
   );
 
@@ -41,6 +61,10 @@ export class ProductService {
       tap((c) => console.log(c)),
       catchError((err) => this.handleError(err))
     );
+  }
+
+  productSelected(selectedProduct: number): void {
+    this.productSelectedSubject.next(selectedProduct);
   }
 
   private getProductsWithReviews(product: Product): Observable<Product> {
