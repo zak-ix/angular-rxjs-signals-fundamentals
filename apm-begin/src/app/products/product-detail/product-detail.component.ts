@@ -4,6 +4,7 @@ import { NgIf, NgFor, CurrencyPipe, AsyncPipe } from '@angular/common';
 import { Product } from '../product';
 import { catchError, EMPTY, tap } from 'rxjs';
 import { ProductService } from '../product.service';
+import { CartService } from 'src/app/cart/cart.service';
 
 @Component({
   selector: 'pm-product-detail',
@@ -14,6 +15,7 @@ import { ProductService } from '../product.service';
 export class ProductDetailComponent {
   errorMessage = '';
   private productService = inject(ProductService);
+  private cartService = inject(CartService);
 
   readonly product$ = this.productService.product$.pipe(
     tap(() => console.log('in subscription')),
@@ -26,5 +28,7 @@ export class ProductDetailComponent {
   // Set the page title
   pageTitle = 'product details';
 
-  addToCart(product: Product) {}
+  addToCart(product: Product) {
+    this.cartService.addToCart(product);
+  }
 }
