@@ -14,20 +14,23 @@ import { catchError, EMPTY, tap } from 'rxjs';
 export class ProductListComponent {
   // Just enough here for the template to compile
   pageTitle = 'Products';
-  errorMessage = '';
 
   private productService = inject(ProductService);
 
-  readonly products$ = this.productService.products$.pipe(
-    tap(() => console.log('In component pipe')),
-    catchError((err) => {
-      this.errorMessage = err;
-      return EMPTY;
-    })
-  );
+  // readonly products$ = this.productService.products$.pipe(
+  //   tap(() => console.log('In component pipe')),
+  //   catchError((err) => {
+  //     this.errorMessage = err;
+  //     return EMPTY;
+  //   })
+  // );
+
+  readonly products = this.productService.products;
+  readonly errorMessage = this.productService.productsError;
 
   // Selected product id to highlight the entry
-  readonly selectedProductId$ = this.productService.productSelected$;
+  // readonly selectedProductId$ = this.productService.productSelected$;
+  selectedProductId = this.productService.selectedProductId;
 
   onSelected(productId: number): void {
     this.productService.productSelected(productId);
